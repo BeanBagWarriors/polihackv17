@@ -10,11 +10,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    email:{
-        type: String,
+    machines:{
+        type: Array,
         required: true,
-        unique: true,
-    },
+        default: [],
+    }
 }, {timestamps: true});
 
 userSchema.index({ email: 1 }, { unique: true });

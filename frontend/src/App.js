@@ -1,13 +1,20 @@
-import { Button } from "@nextui-org/react";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import NavBar from './components/NavBar';
+
 
 function App() {
   return (
-    <div className="App">
-      App
-    </div>
+    <BrowserRouter>
+      <div className="App">
+        <NavBar/>
+
+        <Routes>
+          <Route path = "/home" element={<HomePage/>}/>
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
-
-// global internet of things
 
 export default App;

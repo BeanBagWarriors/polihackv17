@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import NavBar from './components/NavBar';
+import Map from './pages/Map';
 
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
 
         <Routes>
           <Route path = "/home" element={<HomePage/>}/>
+          <Route path = "/map" element={<Map/>}/>
         </Routes>
       </div>
     </BrowserRouter>

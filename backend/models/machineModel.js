@@ -1,24 +1,23 @@
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema({
-    email:{
+const machineSchema = new mongoose.Schema({
+    key:{
         type: String,
         required: true,
         unique: true,
     },
-    password:{
+    name:{
         type: String,
         required: true,
+        default: 'Vending Machine',
     },
-    machines:{
+    content:{
         type: Array,
         required: true,
         default: [],
-    }
+    },
 }, {timestamps: true});
 
-userSchema.index({ email: 1 }, { unique: true });
+const machineCollection = mongoose.model('Machines', machineSchema);
 
-const userCollection = mongoose.model('User', userSchema);
-
-module.exports = userCollection;
+module.exports = machineCollection;

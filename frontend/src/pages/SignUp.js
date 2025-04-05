@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheck, FaTimes } from 'react-icons/fa';
+import { useAuthContext } from '../Hooks/useAuthContext.js';
 
 const SignUp = () => {
+  const {dispatch} = useAuthContext();
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -46,7 +47,7 @@ const SignUp = () => {
     e.preventDefault();
     
     // Validation
-    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.email || !formData.password || !formData.confirmPassword) {
       setError('Please fill in all fields');
       return;
     }
@@ -65,42 +66,31 @@ const SignUp = () => {
     
     setIsLoading(true);
     setError('');
-    
-    try {
-      // Replace with your actual API call for registration
-      // For demo purposes, we'll just simulate a successful registration
-      setTimeout(() => {
-        // Simulate redirect after successful registration
-        navigate('/signin');
-        setIsLoading(false);
-      }, 1500);
-      
-      // Example of a real API call:
-      /*
-      const response = await fetch('your-api-endpoint/register', {
+
+      const response = await fetch(`${process.env.REACT_APP_API}/api/user/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          fullName: formData.fullName,
           email: formData.email,
           password: formData.password,
         }),
       });
       
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+      const json = await response.json();
+
+      if(!response.ok){
+        console.log(json.error);
+        setError(json.error);
+        setIsLoading(false);
       }
       
-      // Redirect to sign in or confirmation page
-      navigate('/signin');
-      */
-    } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
-      setIsLoading(false);
+      if(response.ok){
+        localStorage.setItem('user', JSON.stringify(json));
+        dispatch({type: 'LOGIN', payload: json});
+        setIsLoading(false);
+        navigate('/dashboard');
     }
   };
   
@@ -115,7 +105,6 @@ const SignUp = () => {
   // Function to check overall form validity
   const isFormValid = () => {
     return (
-      formData.fullName && 
       formData.email && 
       formData.password &&
       formData.confirmPassword &&

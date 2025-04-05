@@ -1,5 +1,25 @@
 const mongoose = require('mongoose');
 
+const notificationSchema = new mongoose.Schema({
+    message:{
+        type: String,
+        required: true,
+    },
+    date:{
+        type: String,
+        required: true,
+    },
+    status:{
+        type: String,
+        required: true,
+        default: 'unread',
+    },
+    type:{
+        type: String,
+        required: true,
+    }
+  });
+
 const userSchema = new mongoose.Schema({
     email:{
         type: String,
@@ -12,6 +32,11 @@ const userSchema = new mongoose.Schema({
     },
     machines:{
         type: Array,
+        required: true,
+        default: [],
+    },
+    notifications:{
+        type: [notificationSchema],
         required: true,
         default: [],
     }

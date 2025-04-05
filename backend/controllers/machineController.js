@@ -124,11 +124,25 @@ const addItemsToContent = async (req, res) =>{
     }
 }
 
+const updateSellingHistory = (machine, item) => {
+    const foundItem = machine.totalSales.find(h => h.name === item.name);
+    if (foundItem) {
+        foundItem.amount++;
+        machine.markModified('totalSales');
+    } else {
+        machine.totalSales.push({
+            name: item.name,
+            amount: 1,
+        });
+    }
+};
+
+
 const removeItemsFromContent = async (req, res) =>{
     try{
         const {id, key} = req.body || {};
 
-        const machine = await machineModel.findOne({id});
+        let machine = await machineModel.findOne({id});
 
         if(!machine){
             return res.status(400).json({error: 'Machine does not exist!'});
@@ -138,14 +152,37 @@ const removeItemsFromContent = async (req, res) =>{
             return res.status(400).json({error: 'key is required!'});
         }
 
-        machine.content.forEach((item) => {
-            if(item.key === key){
-                if(item.amount == 0){
-                    return res.status(400).json({error: 'There are no items to remove!'});
+        let found = false;
+
+        for (const item of machine.content) {
+            if (item.key === key) {
+                found = true;
+
+                if (item.amount === 0) {
+                    return res.status(400).json({ error: 'There are no items to remove!' });
                 }
-                item.amount = 0;
+
+                updateSellingHistory(machine, item);
+                item.amount--;
+                machine.totalRevenue += item.retailPrice;
+                machine.activeRevenue += item.retailPrice;
+
+                const sale = {
+                    name: item.name,
+                    originalPrice: item.originalPrice,
+                    retailPrice: item.retailPrice,
+                    date: new Date().toISOString(),
+                }
+
+                machine.salesHistory.push(sale);
+
+                break;
             }
-        });
+        }
+
+        if (!found) {
+            return res.status(404).json({ error: 'Item not found in machine content!' });
+        }
 
         await machine.save();
 
@@ -186,11 +223,34 @@ const setMachineContent = async (req, res) =>{
     }
 }
 
+const getUserMachines = async (req, res) =>{
+    try{
+        const {email} = req.params || {};
+
+        if(!email){
+            return res.status(400).json({error: 'Email is required!'});
+        }
+
+        const user = await userModel.findOne({email});
+
+        if(!user){
+            return res.status(400).json({error: 'User does not exist!'});
+        }
+
+        const machines = await machineModel.find({id: {$in: user.machines}});
+
+        res.status(200).json(machines);
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
+
 module.exports = {
     createMachine,
     addMachineToUser,
     getMachineContent,
     addItemsToContent,
     removeItemsFromContent,
-    setMachineContent
+    setMachineContent,
+    getUserMachines
 }

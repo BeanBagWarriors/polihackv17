@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaBars, FaTimes, FaUser, FaCog, FaChartLine, FaSignOutAlt, FaBell } from 'react-icons/fa';
 import logo from '../assets/logo.png';
+import { useAuthContext } from '../Hooks/useAuthContext';
+import { useLogout } from '../Hooks/useLogout';
 
 const NavBar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const navigate = useNavigate();
+    const { user } = useAuthContext();
+    const { logout } = useLogout();
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -34,12 +38,33 @@ const NavBar = () => {
         navigate('/dashboard');
     };
 
-    // Mock notifications
-    const notifications = [
-        { id: 1, message: "Low stock alert: Office Park", time: "10 min ago" },
-        { id: 2, message: "Cash deposit full: Train Station", time: "1 hour ago" },
-        { id: 3, message: "Maintenance needed: Campus Center", time: "2 hours ago" }
-    ];
+    
+    const [notifications, setNotifications] = useState([]);
+
+    const fetchNotifications = async () => {
+            const response = await fetch(`${process.env.REACT_APP_API}/api/user/getNotifications/${user.username}`,{
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                }
+            });
+            
+            const json = await response.json();
+
+            if (response.ok) {
+                setNotifications(json.notifications);
+                console.log('Notifications fetched successfully:', json);
+            }
+
+            if(!response.ok) {
+                console.error('Failed to fetch notifications:', json.error);
+            }
+        }
+
+    useEffect(() => {
+        if(user)
+            fetchNotifications();
+    }, [user]);
 
     return (
         <nav className="fixed top-0 left-0 w-full h-[80px] bg-[#3D52A0] shadow-md z-50 px-4 lg:px-8 flex items-center justify-between">
@@ -47,20 +72,24 @@ const NavBar = () => {
             <div className="flex items-center gap-8">
                 <button 
                     onClick={navigateToDashboard}
-                    className="flex items-center focus:outline-none hover:opacity-80 transition-opacity"
+                    className="flex items-center mb-2 focus:outline-none hover:opacity-80 transition-opacity text-white font-bold text-2xl"
                 >
+                    MyVendingMachine
                 </button>
                 
                 {/* Desktop Navigation Items */}
-                <div className="hidden lg:flex items-center gap-6">
-                    <Link to="/dashboard" className="text-[#EDE8F5] hover:text-white transition-colors">Dashboard</Link>
-                    <Link to="/analytics" className="text-[#EDE8F5] hover:text-white transition-colors">Analytics</Link>
-                </div>
+                {user &&
+                    <div className="hidden lg:flex items-center gap-6">
+                        <Link to="/dashboard" className="text-[#EDE8F5] hover:text-white transition-colors">Dashboard</Link>
+                        <Link to="/analytics" className="text-[#EDE8F5] hover:text-white transition-colors">Analytics</Link>
+                    </div>
+                }
             </div>
             
             {/* Right Side - User Controls */}
             <div className="flex items-center gap-4">
                 {/* Notifications */}
+                {user &&
                 <div className="relative">
                     <button 
                         className="relative p-2 rounded-full hover:bg-[#7091E6] focus:outline-none focus:ring-2 focus:ring-[#ADBBDA] transition-all"
@@ -84,8 +113,11 @@ const NavBar = () => {
                                 <div className="max-h-64 overflow-y-auto">
                                     {notifications.map(notification => (
                                         <div key={notification.id} className="px-4 py-2 hover:bg-gray-50 border-b border-gray-100">
-                                            <p className="text-sm text-[#3D52A0]">{notification.message}</p>
-                                            <p className="text-xs text-[#8697C4] mt-1">{notification.time}</p>
+                                            <div className='flex flex-row gap-1'>
+                                                <p className="text-sm text-[#3D52A0] font-semibold">{notification.type}:</p>
+                                                <p className="text-sm text-[#3D52A0]">{notification.message}</p>
+                                            </div>
+                                            <p className="text-xs text-[#8697C4] mt-1">{notification.date}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -103,6 +135,7 @@ const NavBar = () => {
                         </div>
                     )}
                 </div>
+                }   
                 {/* Mobile Menu Button */}
                 <button 
                     className="md:hidden p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ADBBDA] transition-all"
@@ -116,6 +149,7 @@ const NavBar = () => {
                 </button>
                 
                 {/* Sign In/Up Buttons (Desktop) */}
+                {!user ?
                 <div className="hidden md:flex gap-4">
                     <button 
                         onClick={() => navigate('/signin')}
@@ -130,6 +164,34 @@ const NavBar = () => {
                         Sign Up
                     </button>
                 </div>
+                : 
+                <div className="relative">
+                    <button 
+                        onClick={toggleProfileMenu}
+                        className="flex items-center gap-2 px-3 py-2 text-white hover:bg-[#7091E6] rounded-lg transition-all"
+                    >
+                        <span>{user.username}</span>
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    
+                    {isProfileMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                            <button 
+                                onClick={() => {
+                                    navigate('/signin');
+                                    logout();
+                                }}
+                                className="w-full text-left px-4 py-2 text-[#3D52A0] hover:bg-gray-50 flex items-center gap-2"
+                            >
+                                <FaSignOutAlt className="text-sm" />
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
+                }
             </div>
             
             {/* Mobile Menu */}

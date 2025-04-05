@@ -48,6 +48,27 @@ const machineSchema = new mongoose.Schema({
         required: true,
         default: 'unset',
     },
+    totalSales:{
+        type: Array,
+        required: true,
+        default: [],
+    },
+    totalRevenue:{
+        type: Number,
+        required: true,
+        default: 0,
+    },
+    activeRevenue:{
+        type: Number,
+        required: true,
+        default: 0,
+    },
+    salesHistory:{
+        type: Array,
+        required: true,
+        default: [],
+    },
+
 }, {timestamps: true});
 
 const machineCollection = mongoose.model('Machines', machineSchema);

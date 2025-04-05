@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useAuthContext } from '../Hooks/useAuthContext.js';
 
 const SignIn = () => {
+  const { dispatch } = useAuthContext();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,40 +24,31 @@ const SignIn = () => {
     setIsLoading(true);
     setError('');
     
-    try {
-      // Replace with your actual authentication API call
-      // For demo purposes, we'll just simulate a successful login
-      setTimeout(() => {
-        // Simulating successful login
-        localStorage.setItem('isLoggedIn', 'true');
-        navigate('/dashboard');
-        setIsLoading(false);
-      }, 1000);
-      
-      // Example of an actual API call:
-      /*
-      const response = await fetch('your-api-endpoint/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-      
-      // Save token or user info
-      localStorage.setItem('token', data.token);
-      navigate('/dashboard');
-      */
-    } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+    const response = await fetch(`${process.env.REACT_APP_API}/api/user/signin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password
+      }),
+    });
+    
+    const json = await response.json();
+
+    if(!response.ok){
+      console.log(json.error);
+      setError(json.error);
       setIsLoading(false);
     }
+    
+    if(response.ok){
+      localStorage.setItem('user', JSON.stringify(json));
+      dispatch({type: 'LOGIN', payload: json});
+      setIsLoading(false);
+      navigate('/dashboard');
+  }
   };
 
   const toggleShowPassword = () => {

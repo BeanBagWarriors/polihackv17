@@ -5,7 +5,8 @@ const {
     getMachineContent,
     addItemsToContent,
     removeItemsFromContent,
-    setMachineContent
+    setMachineContent,
+    getUserMachines
 } = require('../controllers/machineController');
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.get('/getMachineContent/:id', getMachineContent);
 router.post('/addItemsToContent', addItemsToContent);
 router.post('/removeItemsFromContent', removeItemsFromContent);
 router.post('/setMachineContent', setMachineContent);
+router.get('/getUserMachines/:email', getUserMachines);
 
 module.exports = router;

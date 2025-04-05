@@ -48,6 +48,11 @@ const machineSchema = new mongoose.Schema({
         required: true,
         default: 'unset',
     },
+    sellingHistory:{
+        type: Array,
+        required: true,
+        default: [],
+    }
 }, {timestamps: true});
 
 const machineCollection = mongoose.model('Machines', machineSchema);

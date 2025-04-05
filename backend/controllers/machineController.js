@@ -125,12 +125,12 @@ const addItemsToContent = async (req, res) =>{
 }
 
 const updateSellingHistory = (machine, item) => {
-    const foundItem = machine.sellingHistory.find(h => h.name === item.name);
+    const foundItem = machine.totalSales.find(h => h.name === item.name);
     if (foundItem) {
         foundItem.amount++;
-        machine.markModified('sellingHistory');
+        machine.markModified('totalSales');
     } else {
-        machine.sellingHistory.push({
+        machine.totalSales.push({
             name: item.name,
             amount: 1,
         });
@@ -164,6 +164,18 @@ const removeItemsFromContent = async (req, res) =>{
 
                 updateSellingHistory(machine, item);
                 item.amount--;
+                machine.totalRevenue += item.retailPrice;
+                machine.activeRevenue += item.retailPrice;
+
+                const sale = {
+                    name: item.name,
+                    originalPrice: item.originalPrice,
+                    retailPrice: item.retailPrice,
+                    date: new Date().toISOString(),
+                }
+
+                machine.salesHistory.push(sale);
+
                 break;
             }
         }

@@ -279,7 +279,7 @@ const Map = () => {
         </motion.div>
 
         {/* Map and List */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 z-0 relative">
           {/* Map */}
           <motion.div 
             className="lg:col-span-2 bg-white rounded-xl shadow-md overflow-hidden"

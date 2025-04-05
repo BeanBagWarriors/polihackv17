@@ -24,13 +24,6 @@ const NavBar = () => {
                     </button>
                 </div>
                 
-                <button 
-                    className="block text-[#EDE8F5] hover:text-[#ADBBDA] active:scale-90 transition-all duration-200 rounded-full p-1"
-                    onClick={toggleMenu}
-                >
-                    <FaBars className="h-6 w-6" />
-                </button>
-                
                 {isMenuOpen && (
                     <div className="absolute top-16 right-4 bg-[#3D52A0] p-4 rounded-lg shadow-lg flex flex-col gap-4 md:hidden z-50">
                         <button className="px-4 py-2 bg-transparent text-[#EDE8F5] border border-[#EDE8F5] rounded-lg hover:bg-[#7091E6] active:bg-[#8697C4] active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#ADBBDA] focus:ring-opacity-50">

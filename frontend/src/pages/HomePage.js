@@ -2,8 +2,10 @@ import React, { useMemo, useRef } from 'react';
 import { Parallax, ParallaxLayer } from '@react-spring/parallax';
 import { motion } from 'framer-motion';
 import { FaStar, FaChartLine, FaShoppingCart, FaMobileAlt, FaServer, FaClock, FaMoneyBillWave, FaBoxOpen, FaTools, FaRegLightbulb, FaCheckCircle, FaLock, FaRegChartBar, FaDesktop } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const parallaxRef = useRef(null);
   
   // Color palette - using these colors but for a lighter theme
@@ -17,52 +19,52 @@ const HomePage = () => {
   };
 
   // Pre-compute random values for consistent rendering
-const stars = useMemo(() => [...Array(200)].map(() => ({
-  fontSize: `${Math.random() * 14 + 4}px`,
-  left: `${Math.random() * 100}%`,
-  top: `${Math.random() * 400}%`, 
-  animationDuration: `${Math.random() * 5 + 2}s`
-})), []);
-
-const shapes = useMemo(() => [...Array(40)].map(() => {
-  const baseColor = Math.random() > 0.5 ? colors.lightBlue : colors.darkGray;
-  return {
+  const stars = useMemo(() => [...Array(200)].map(() => ({
+    fontSize: `${Math.random() * 14 + 4}px`,
     left: `${Math.random() * 100}%`,
     top: `${Math.random() * 400}%`, 
-    rotate: `${Math.random() * 360}deg`,
-    width: `${Math.random() * 120 + 50}px`,
-    height: `${Math.random() * 120 + 50}px`,
-    borderRadius: Math.random() > 0.5 ? '50%' : '0%',
-    background: `${baseColor}${Math.floor(Math.random() * 50 + 30).toString(16)}`,
-    opacity: Math.random() * 0.4 + 0.1
-  };
-}), []);
+    animationDuration: `${Math.random() * 5 + 2}s`
+  })), []);
 
-const floatingLines = useMemo(() => [...Array(40)].map(() => {
-  return {
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 400}%`,
-    width: `${Math.random() * 200 + 100}px`,
-    height: `${Math.random() * 3 + 1}px`,
-    rotate: `${Math.random() * 180}deg`,
-    opacity: Math.random() * 0.15 + 0.05,
-    color: Math.random() > 0.7 ? colors.darkBlue : (Math.random() > 0.5 ? colors.lightBlue : colors.darkGray),
-    animationDuration: `${Math.random() * 15 + 10}s` // 10-25s duration for slow movement
-  };
-}), []);
+  const shapes = useMemo(() => [...Array(40)].map(() => {
+    const baseColor = Math.random() > 0.5 ? colors.lightBlue : colors.darkGray;
+    return {
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 400}%`, 
+      rotate: `${Math.random() * 360}deg`,
+      width: `${Math.random() * 120 + 50}px`,
+      height: `${Math.random() * 120 + 50}px`,
+      borderRadius: Math.random() > 0.5 ? '50%' : '0%',
+      background: `${baseColor}${Math.floor(Math.random() * 50 + 30).toString(16)}`,
+      opacity: Math.random() * 0.4 + 0.1
+    };
+  }), []);
 
-// Add floating orbs - large blurred circles
-const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
-  return {
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 400}%`,
-    size: `${Math.random() * 200 + 100}px`, // Large orbs
-    opacity: Math.random() * 0.1 + 0.05, // Very subtle
-    blur: `${Math.random() * 60 + 40}px`, // Blurry effect
-    color: Math.random() > 0.5 ? colors.lightBlue : colors.darkBlue,
-    animationDuration: `${Math.random() * 30 + 20}s` // Very slow animation
-  };
-}), []);
+  const floatingLines = useMemo(() => [...Array(40)].map(() => {
+    return {
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 400}%`,
+      width: `${Math.random() * 200 + 100}px`,
+      height: `${Math.random() * 3 + 1}px`,
+      rotate: `${Math.random() * 180}deg`,
+      opacity: Math.random() * 0.15 + 0.05,
+      color: Math.random() > 0.7 ? colors.darkBlue : (Math.random() > 0.5 ? colors.lightBlue : colors.darkGray),
+      animationDuration: `${Math.random() * 15 + 10}s` // 10-25s duration for slow movement
+    };
+  }), []);
+
+  // Add floating orbs - large blurred circles
+  const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
+    return {
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 400}%`,
+      size: `${Math.random() * 200 + 100}px`, // Large orbs
+      opacity: Math.random() * 0.1 + 0.05, // Very subtle
+      blur: `${Math.random() * 60 + 40}px`, // Blurry effect
+      color: Math.random() > 0.5 ? colors.lightBlue : colors.darkBlue,
+      animationDuration: `${Math.random() * 30 + 20}s` // Very slow animation
+    };
+  }), []);
   
   // Animation variants
   const fadeIn = {
@@ -119,30 +121,6 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
       transition: { duration: 0.5 }
     }
   };
-  
-  // Navigation functions
-  const scrollToSection = (page) => {
-    if (parallaxRef.current) {
-      parallaxRef.current.scrollTo(page);
-    }
-  };
-
-  // Handle button clicks
-  const handleRequestDemo = () => {
-    window.location.href = "mailto:sales@vendingintelligence.com?subject=Demo Request";
-  };
-
-  const handleLearnMore = () => {
-    scrollToSection(1);
-  };
-
-  const handleContactSales = () => {
-    window.location.href = "tel:+1234567890";
-  };
-
-  const handleGetStarted = () => {
-    window.location.href = "https://vendingintelligence.com/signup";
-  };
 
   return (
     <div className="relative h-screen overflow-hidden">
@@ -180,9 +158,9 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
           /* Line flow animation */
           @keyframes flow {
             0% { transform: translateX(-20px) rotate(var(--rotate)); opacity: var(--min-opacity); }
-    50% { transform: translateX(20px) rotate(calc(var(--rotate) + 5deg)); opacity: var(--max-opacity); }
-    100% { transform: translateX(-20px) rotate(var(--rotate)); opacity: var(--min-opacity); }
-  }
+            50% { transform: translateX(20px) rotate(calc(var(--rotate) + 5deg)); opacity: var(--max-opacity); }
+            100% { transform: translateX(-20px) rotate(var(--rotate)); opacity: var(--min-opacity); }
+          }
         
         /* Content section styling */
         .content-section {
@@ -261,12 +239,6 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
               Real-time monitoring and analytics for your vending machines. 
               Increase revenue, reduce costs, and make data-driven decisions.
             </motion.p>
-            
-            <motion.div 
-              className="flex justify-center gap-6"
-              variants={fadeIn}
-            >
-            </motion.div>
 
             <motion.div 
               className="mt-16 grid grid-cols-3 gap-10"
@@ -353,6 +325,7 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
               viewport={{ once: true, amount: 0.2 }}
               variants={staggerContainer}
             >
+              {/* Feature cards */}
               <motion.div 
                 className="bg-white rounded-xl p-8 hover:shadow-xl transition duration-300 border border-[#ADBBDA] border-opacity-50"
                 variants={featureCardVariants}
@@ -451,6 +424,7 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
               viewport={{ once: true, amount: 0.2 }}
               variants={fadeIn}
             >
+              {/* Add your button here if needed */}
             </motion.div>
           </div>
         </ParallaxLayer>
@@ -481,6 +455,7 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
               </p>
             </motion.div>
 
+            {/* Steps section */}
             <div className="relative">
               {/* Timeline line */}
               <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-[#ADBBDA] transform -translate-x-1/2"></div>
@@ -569,20 +544,10 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
                 </div>
               </motion.div>
             </div>
-            
-            <motion.div 
-              className="mt-16 flex justify-center"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={fadeIn}
-            >
-             
-            </motion.div>
           </div>
         </ParallaxLayer>
         
-        {/* Pricing section */}
+        {/* Business Model section */}
         <ParallaxLayer
           offset={3}
           speed={0.6}
@@ -593,127 +558,123 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
             justifyContent: 'center',
           }}
         >
-          <div className="max-w-6xl w-full px-8 py-16 content-section relative z-10">
+          <div className="z-50 relative max-w-6xl w-full px-8 py-20 content-section relative z-10"> {/* Increased padding */}
             <motion.div 
-              className="text-center mb-16"
+              className="text-center mb-20" /* Increased spacing */
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
               variants={fadeIn}
             >
-              <span className="bg-[#3D52A0] text-white text-lg px-6 py-2 rounded-full uppercase tracking-wider shadow-sm">Pricing</span>
-              <h2 className="section-title text-5xl font-bold mt-6 mb-6">Simple, Affordable Pricing</h2>
-              <p className="text-[#8697C4] text-xl max-w-3xl mx-auto">
-                Start monitoring your vending machines with our cost-effective solution, designed to deliver value from day one.
+              <h2 className="section-title text-6xl font-bold mt-8 mb-8">Pay Only For Success</h2> {/* Increased size and spacing */}
+              <p className="text-[#8697C4] text-2xl max-w-3xl mx-auto"> {/* Increased size */}
+                Our innovative approach means you only pay for what works. The device is your only upfront cost.
               </p>
             </motion.div>
 
             <motion.div 
-              className="bg-gradient-to-br from-[#3D52A0] to-[#2A3973] rounded-xl overflow-hidden shadow-xl max-w-3xl mx-auto"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
-              variants={fadeIn}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.2 }
+                }
+              }}
             >
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <p className="text-[#ADBBDA] text-lg uppercase tracking-wider font-medium">Standard Plan</p>
-                    <h3 className="text-white text-3xl font-bold">Complete Solution</h3>
+              {/* Card 1: One-time payment */}
+              <motion.div 
+                className="bg-gradient-to-tr from-[#f5f7ff] to-white rounded-xl border border-[#ADBBDA] overflow-hidden shadow-lg"
+                variants={fadeIn}
+                whileHover={{ y: -10, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+              >
+                <div className="p-8">
+                  <div className="rounded-full bg-[#EDE8F5] w-16 h-16 flex items-center justify-center mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#3D52A0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
-                  <motion.div 
-                    className="bg-[#7091E6] h-16 w-16 rounded-full flex items-center justify-center shadow-lg"
-                    variants={iconVariants}
-                    whileHover={{ rotate: 15 }}
-                  >
-                    <FaRegLightbulb className="text-3xl text-white" />
-                  </motion.div>
-                </div>
-
-                <div className="flex flex-wrap items-end mb-6">
-                  <div className="mr-10 mb-4">
-                    <p className="text-[#ADBBDA] text-base mb-1">Initial Cost</p>
-                    <div className="flex items-end">
-                      <span className="text-white text-4xl font-bold">$10</span>
-                      <span className="text-[#ADBBDA] ml-2 pb-1">for device + first month</span>
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                    <p className="text-[#ADBBDA] text-base mb-1">Monthly Fee</p>
-                    <div className="flex items-end">
-                      <span className="text-white text-4xl font-bold">$8</span>
-                      <span className="text-[#ADBBDA] ml-2 pb-1">/month thereafter</span>
-                    </div>
+                  <h3 className="text-2xl font-bold text-[#3D52A0] mb-4">One-Time Device Fee</h3>
+                  <p className="text-[#8697C4] mb-6">Pay only once for the hardware device. No monthly subscriptions or hidden fees.</p>
+                  <div className="mb-6">
+                    <p className="text-4xl font-bold text-[#3D52A0]">$10</p>
+                    <p className="text-[#8697C4] text-sm">per device, one-time payment</p>
                   </div>
                 </div>
+              </motion.div>
 
-                <motion.div 
-                  className="bg-[rgba(255,255,255,0.1)] p-5 rounded-lg mb-6"
-                  whileHover={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-white text-xl font-bold">Optional Analytics Module</h4>
-                      <p className="text-[#ADBBDA] text-sm mt-1">Enhanced analytics and reporting capabilities</p>
-                    </div>
-                    <div>
-                      <span className="text-white text-2xl font-bold">+$5</span>
-                      <span className="text-[#ADBBDA] text-sm ml-1">/month</span>
-                    </div>
+              {/* Card 2: Success-based fee */}
+              <motion.div 
+                className="bg-gradient-to-br from-[#3D52A0] to-[#2A3973] rounded-xl overflow-hidden shadow-xl"
+                variants={fadeIn}
+                whileHover={{ y: -10, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+              >
+                <div className="p-8">
+                  <div className="rounded-full bg-white bg-opacity-20 w-16 h-16 flex items-center justify-center mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
-                </motion.div>
-
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <h5 className="text-white text-lg font-bold mb-3">Standard Features</h5>
-                    <ul className="text-[#EDE8F5] space-y-3">
-                      <li className="flex items-center">
-                        <FaCheckCircle className="text-[#7091E6] mr-3 flex-shrink-0" size={18} />
-                        <span>Real-time sales monitoring</span>
-                      </li>
-                      <li className="flex items-center">
-                        <FaCheckCircle className="text-[#7091E6] mr-3 flex-shrink-0" size={18} />
-                        <span>Inventory tracking</span>
-                      </li>
-                      <li className="flex items-center">
-                        <FaCheckCircle className="text-[#7091E6] mr-3 flex-shrink-0" size={18} />
-                        <span>Mobile dashboard access</span>
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h5 className="text-white text-lg font-bold mb-3">Support & Security</h5>
-                    <ul className="text-[#EDE8F5] space-y-3">
-                      <li className="flex items-center">
-                        <FaCheckCircle className="text-[#7091E6] mr-3 flex-shrink-0" size={18} />
-                        <span>Basic reporting</span>
-                      </li>
-                      <li className="flex items-center">
-                        <FaCheckCircle className="text-[#7091E6] mr-3 flex-shrink-0" size={18} />
-                        <span>Email support</span>
-                      </li>
-                      <li className="flex items-center">
-                        <FaCheckCircle className="text-[#7091E6] mr-3 flex-shrink-0" size={18} />
-                        <span>Cloud data storage</span>
-                      </li>
-                    </ul>
+                  <h3 className="text-2xl font-bold text-white mb-4">Success-Based Model</h3>
+                  <p className="text-[#EDE8F5] opacity-90 mb-6">We only earn when you earn more. Our fee is a small percentage of the additional profits we help you generate.</p>
+                  <div className="mb-6">
+                    <p className="text-4xl font-bold text-white flex items-center">
+                      5%
+                      <span className="text-lg ml-2 opacity-80">of bonus profits</span>
+                    </p>
+                    <p className="text-[#EDE8F5] opacity-70 text-sm">Only applied to increased revenue</p>
                   </div>
                 </div>
+              </motion.div>
 
-                <p className="text-[#ADBBDA] text-sm text-center mt-6">
-                  No contracts. Cancel anytime. All prices exclude applicable taxes.
-                </p>
-              </div>
+              {/* Card 3: Platform Access */}
+              <motion.div 
+                className="bg-gradient-to-tr from-[#f5f7ff] to-white rounded-xl border border-[#ADBBDA] overflow-hidden shadow-lg"
+                variants={fadeIn}
+                whileHover={{ y: -10, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+              >
+                <div className="p-8">
+                  <div className="rounded-full bg-[#EDE8F5] w-16 h-16 flex items-center justify-center mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#3D52A0]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#3D52A0] mb-4">Platform & Analytics</h3>
+                  <p className="text-[#8697C4] mb-6">Full access to our advanced analytics dashboard and management tools at no additional cost.</p>
+                  <div className="mb-6">
+                    <p className="text-4xl font-bold text-[#3D52A0]">Free</p>
+                    <p className="text-[#8697C4] text-sm">unlimited access to all features</p>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
             
             <motion.div 
-              className="mt-12 flex justify-center"
+              className="mt-16 flex flex-col items-center" /* Increased spacing */
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
               variants={fadeIn}
             >
+              <p className="text-[#8697C4] text-xl max-w-3xl mx-auto mb-8 text-center"> 
+                Ready to transform your vending machine business with our risk-free approach? 
+                Check out our device specifications and see how easy it is to get started.
+              </p>
+              
+              <motion.button
+                className=" bg-[#3D52A0] text-white px-10 py-5 rounded-xl text-xl font-medium hover:bg-[#7091E6] transition-all shadow-lg flex items-center"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate('/product')} // Navigate to Product.js using useNavigate
+              >
+                Get Started
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </motion.button>
             </motion.div>
           </div>
         </ParallaxLayer>
@@ -744,11 +705,11 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
               initial={{ opacity: 0 }}
               animate={{ 
                 opacity: shape.opacity,
-                y: [0, Math.random() > 0.5 ? 15 : -15, 0],
+                y: [0, Math.random() > 0.5 ? 25 : -25, 0],
               }}
               transition={{ 
-                opacity: { duration: 2, delay: i * 0.2 },
-                y: { duration: Math.random() * 5 + 8, repeat: Infinity, ease: "easeInOut" }
+                opacity: { duration: 2, delay: i * 0.1 },
+                y: { duration: 20, repeat: Infinity, ease: "linear" }
               }}
               style={{
                 position: 'absolute',
@@ -764,11 +725,65 @@ const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
           ))}
         </ParallaxLayer>
         
+        {/* Floating Orbs Layer */}
+        <ParallaxLayer offset={0} speed={0.15} factor={4}>
+          {floatingOrbs.map((orb, i) => (
+            <div 
+              key={i}
+              style={{
+                position: 'absolute',
+                left: orb.left,
+                top: orb.top,
+                width: orb.size,
+                height: orb.size,
+                backgroundColor: orb.color,
+                opacity: orb.opacity,
+                borderRadius: '50%',
+                filter: `blur(${orb.blur})`,
+                animation: `float ${orb.animationDuration} infinite ease-in-out`
+              }}
+            />
+          ))}
+        </ParallaxLayer>
+
+        {/* Flowing Lines Layer */}
+        <ParallaxLayer offset={0} speed={0.2} factor={4}>
+          {floatingLines.map((line, i) => (
+            <div 
+              key={i}
+              style={{
+                position: 'absolute',
+                left: line.left,
+                top: line.top,
+                width: line.width,
+                height: line.height,
+                backgroundColor: line.color,
+                opacity: line.opacity,
+                transform: `rotate(${line.rotate})`,
+                animation: `flow ${line.animationDuration} infinite ease-in-out`,
+                '--min-opacity': line.opacity * 0.5,
+                '--max-opacity': line.opacity * 1.5,
+                '--rotate': line.rotate
+              }}
+            />
+          ))}
+        </ParallaxLayer>
+        
         {/* Navigation indicators */}
         <ParallaxLayer 
           sticky={{ start: 0, end: 4 }}
-          style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '2rem' }}
+          style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', paddingRight: '2rem', zIndex: 1 }}
         >
+          <div className="hidden md:flex flex-col gap-4">
+            {[0, 1, 2, 3].map((page) => (
+              <motion.div
+                key={page}
+                className={`h-4 w-4 rounded-full cursor-pointer ${parallaxRef.current && Math.round(parallaxRef.current.current) === page ? 'bg-[#3D52A0]' : 'bg-[#ADBBDA]'}`}
+                whileHover={{ scale: 1.5 }}
+                onClick={() => parallaxRef.current?.scrollTo(page)}
+              />
+            ))}
+          </div>
         </ParallaxLayer>
       </Parallax>
     </div>

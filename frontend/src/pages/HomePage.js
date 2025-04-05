@@ -16,28 +16,53 @@ const HomePage = () => {
     lightBg: "#f5f7ff"  // Light background color
   };
 
-  // Pre-compute random values for consistent rendering - more stars
-  const stars = useMemo(() => [...Array(60)].map(() => ({
-    fontSize: `${Math.random() * 10 + 3}px`,
+  // Pre-compute random values for consistent rendering
+const stars = useMemo(() => [...Array(200)].map(() => ({
+  fontSize: `${Math.random() * 14 + 4}px`,
+  left: `${Math.random() * 100}%`,
+  top: `${Math.random() * 400}%`, 
+  animationDuration: `${Math.random() * 5 + 2}s`
+})), []);
+
+const shapes = useMemo(() => [...Array(40)].map(() => {
+  const baseColor = Math.random() > 0.5 ? colors.lightBlue : colors.darkGray;
+  return {
     left: `${Math.random() * 100}%`,
     top: `${Math.random() * 400}%`, 
-    animationDuration: `${Math.random() * 5 + 2}s`
-  })), []);
+    rotate: `${Math.random() * 360}deg`,
+    width: `${Math.random() * 120 + 50}px`,
+    height: `${Math.random() * 120 + 50}px`,
+    borderRadius: Math.random() > 0.5 ? '50%' : '0%',
+    background: `${baseColor}${Math.floor(Math.random() * 50 + 30).toString(16)}`,
+    opacity: Math.random() * 0.4 + 0.1
+  };
+}), []);
 
-  const shapes = useMemo(() => [...Array(12)].map(() => {
-    // Use our color palette for shapes
-    const baseColor = Math.random() > 0.5 ? colors.lightBlue : colors.darkGray;
-    return {
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 400}%`, 
-      rotate: `${Math.random() * 360}deg`,
-      width: `${Math.random() * 50 + 30}px`,
-      height: `${Math.random() * 50 + 30}px`,
-      borderRadius: Math.random() > 0.5 ? '50%' : '0%',
-      background: `${baseColor}${Math.floor(Math.random() * 50 + 30).toString(16)}`,
-      opacity: Math.random() * 0.4 + 0.1
-    };
-  }), []);
+const floatingLines = useMemo(() => [...Array(40)].map(() => {
+  return {
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 400}%`,
+    width: `${Math.random() * 200 + 100}px`,
+    height: `${Math.random() * 3 + 1}px`,
+    rotate: `${Math.random() * 180}deg`,
+    opacity: Math.random() * 0.15 + 0.05,
+    color: Math.random() > 0.7 ? colors.darkBlue : (Math.random() > 0.5 ? colors.lightBlue : colors.darkGray),
+    animationDuration: `${Math.random() * 15 + 10}s` // 10-25s duration for slow movement
+  };
+}), []);
+
+// Add floating orbs - large blurred circles
+const floatingOrbs = useMemo(() => [...Array(30)].map(() => {
+  return {
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 400}%`,
+    size: `${Math.random() * 200 + 100}px`, // Large orbs
+    opacity: Math.random() * 0.1 + 0.05, // Very subtle
+    blur: `${Math.random() * 60 + 40}px`, // Blurry effect
+    color: Math.random() > 0.5 ? colors.lightBlue : colors.darkBlue,
+    animationDuration: `${Math.random() * 30 + 20}s` // Very slow animation
+  };
+}), []);
   
   // Animation variants
   const fadeIn = {
@@ -134,16 +159,30 @@ const HomePage = () => {
         }
 
         /* Star animation */
-        @keyframes twinkle {
-          0% { opacity: 0.4; }
-          100% { opacity: 0.9; }
-        }
+          @keyframes twinkle {
+            0% { opacity: 0.4; }
+            100% { opacity: 0.9; }
+          }
 
-        .star {
-          position: absolute;
-          animation: twinkle var(--duration) infinite alternate;
-          color: ${colors.darkBlue}; /* Darker stars on light background */
-        }
+          .star {
+            position: absolute;
+            animation: twinkle var(--duration) infinite alternate;
+            color: ${colors.darkBlue};
+          }
+          
+          /* Floating orb animation */
+          @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-30px) translateX(15px); }
+            100% { transform: translateY(0) translateX(0); }
+          }
+          
+          /* Line flow animation */
+          @keyframes flow {
+            0% { transform: translateX(-20px) rotate(var(--rotate)); opacity: var(--min-opacity); }
+    50% { transform: translateX(20px) rotate(calc(var(--rotate) + 5deg)); opacity: var(--max-opacity); }
+    100% { transform: translateX(-20px) rotate(var(--rotate)); opacity: var(--min-opacity); }
+  }
         
         /* Content section styling */
         .content-section {
@@ -212,7 +251,7 @@ const HomePage = () => {
               className="text-[#3D52A0] text-6xl font-bold mb-6 tracking-wide"
               variants={fadeIn}
             >
-              Vending Intelligence Suite
+              MyVendingMachine
             </motion.h1>
             
             <motion.p 

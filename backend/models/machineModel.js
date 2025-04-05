@@ -16,6 +16,10 @@ const machineSchema = new mongoose.Schema({
         required: true,
         default: [],
     },
+    maxPins:{
+        type: String,
+        required: true,
+    }
 }, {timestamps: true});
 
 const machineCollection = mongoose.model('Machines', machineSchema);

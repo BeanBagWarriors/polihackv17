@@ -4,9 +4,19 @@ const { v4: uuidv4 } = require('uuid');
 
 const createMachine = async (req, res) => {
     try {
+        const { maxPins} = req.body || {};
+
+        if(!maxPins){
+            return res.status(400).json({ error: 'Invalid pins!' });
+        }
+
+        if(maxPins % 16 !== 0){
+            return res.status(400).json({ error: 'Invalid pins!' });
+        }
+
         const key = uuidv4();
 
-        const machine = await machineModel.create({ key });
+        const machine = await machineModel.create({ key, maxPins });
 
         res.status(200).json(machine);
     } catch (error) {
@@ -42,7 +52,28 @@ const addMachineToUser = async (req, res) =>{
     }
 }
 
+const getMachineContent = async (req, res) =>{
+    try{
+        const {key} = req.params || {};
+
+        if(!key){
+            return res.status(400).json({error: 'Key is required!'});
+        }
+
+        const machine = await machineModel.findOne({key});
+
+        if(!machine){
+            return res.status(400).json({error: 'Machine does not exist!'});
+        }
+
+        res.status(200).json(machine);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+}
+
 module.exports = {
     createMachine,
-    addMachineToUser
+    addMachineToUser,
+    getMachineContent
 }

@@ -31,6 +31,11 @@ const Dashboard = () => {
   const [lowStockAlerts, setLowStockAlerts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  const [showAddMachinePopup, setShowAddMachinePopup] = useState(false);
+  const [machineId, setMachineId] = useState('');
+  const [popupError, setPopupError] = useState('');
+  const [popupSuccess, setPopupSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -53,69 +58,126 @@ const Dashboard = () => {
   };
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-        const response = await fetch(`${process.env.REACT_APP_API}/api/machine/getUserMachines/${user?.username}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+  const handleAddVendingMachine = () => {
+    // Instead of navigating, show popup
+    setShowAddMachinePopup(true);
+  };
+  
+  const handleClosePopup = () => {
+    setShowAddMachinePopup(false);
+    setMachineId('');
+    setPopupError('');
+    setPopupSuccess('');
+  };
 
-        const json = await response.json();
+  const handleAddMachineToUser = async (e) => {
+    e.preventDefault();
+    
+    if (!machineId) {
+      setPopupError('Please enter a machine ID');
+      return;
+    }
 
-        if(!response.ok){
-          console.log(json.error);
-          setIsLoading(false);
-        }
+    try {
+      setIsSubmitting(true);
+      setPopupError('');
       
-        if(response.ok){
-          setIsLoading(false);
-          setVendingMachines(json);
+      const response = await fetch(`${process.env.REACT_APP_API}/api/machine/addMachineToUser`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: user.username, 
+          id: machineId 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setPopupError(data.error);
+      } else {
+        setPopupSuccess(data.message || 'Machine added successfully!');
+        setMachineId('');
+        
+        // Refresh machine list after a short delay
+        setTimeout(() => {
+          fetchData();
+          handleClosePopup();
+        }, 2000);
+      }
+    } catch (error) {
+      setPopupError('Failed to add machine. Please try again.');
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const fetchData = async () => {
+    setIsLoading(true);
+      const response = await fetch(`${process.env.REACT_APP_API}/api/machine/getUserMachines/${user?.username}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const json = await response.json();
+
+      if(!response.ok){
+        console.log(json.error);
+        setIsLoading(false);
+      }
+    
+      if(response.ok){
+        setIsLoading(false);
+        setVendingMachines(json);
+      }
+      
+      // Calculate total revenue
+      console.log(json);
+      const total = json.reduce((sum, machine) => sum + machine.totalRevenue, 0);
+      setTotalRevenue(total);
+      
+      // // Generate notifications based on machine statuses
+      const alerts = [];
+      json.forEach(machine => {
+        if (machine.isStockFull) {
+          alerts.push({
+            id: `stock-${machine.id}-${Date.now()}`,
+            machineId: machine.id,
+            machineName: machine.name,
+            type: 'stock',
+            message: `${machine.name} needs restocking`,
+            timestamp: new Date(machine.lastUpdated).toLocaleString(),
+            icon: <FaExclamationTriangle className="text-amber-500" />,
+            severity: 'warning'
+          });
         }
         
-        // Calculate total revenue
-        console.log(json);
-        const total = json.reduce((sum, machine) => sum + machine.totalRevenue, 0);
-        setTotalRevenue(total);
-        
-        // // Generate notifications based on machine statuses
-        const alerts = [];
-        json.forEach(machine => {
-          if (machine.isStockFull) {
-            alerts.push({
-              id: `stock-${machine.id}-${Date.now()}`,
-              machineId: machine.id,
-              machineName: machine.name,
-              type: 'stock',
-              message: `${machine.name} needs restocking`,
-              timestamp: new Date(machine.lastUpdated).toLocaleString(),
-              icon: <FaExclamationTriangle className="text-amber-500" />,
-              severity: 'warning'
-            });
-          }
-          
-          if (machine.isCashFull) {
-            alerts.push({
-              id: `cash-${machine.id}-${Date.now()}`,
-              machineId: machine.id,
-              machineName: machine.name,
-              type: 'cash',
-              message: `${machine.name} cash deposit is full`,
-              timestamp: new Date(machine.lastUpdated).toLocaleString(),
-              icon: <FaMoneyBillWave className="text-red-500" />,
-              severity: 'critical'
-            });
-          }
-        });
-        
-        setLowStockAlerts(alerts.length);
-        setNotifications(alerts);
-        
-        setIsLoading(false);
-    };
+        if (machine.isCashFull) {
+          alerts.push({
+            id: `cash-${machine.id}-${Date.now()}`,
+            machineId: machine.id,
+            machineName: machine.name,
+            type: 'cash',
+            message: `${machine.name} cash deposit is full`,
+            timestamp: new Date(machine.lastUpdated).toLocaleString(),
+            icon: <FaMoneyBillWave className="text-red-500" />,
+            severity: 'critical'
+          });
+        }
+      });
+      
+      setLowStockAlerts(alerts.length);
+      setNotifications(alerts);
+      
+      setIsLoading(false);
+  };
 
+  useEffect(() => {
     if(user)
       fetchData();
   }, [user]);
@@ -126,9 +188,6 @@ const Dashboard = () => {
            machine.location.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  const handleAddVendingMachine = () => {
-    navigate('/add-machine');
-  };
   
   const handleViewAnalytics = () => {
     navigate('/analytics');
@@ -142,6 +201,91 @@ const Dashboard = () => {
 
   return (
     <div className="mt-10 min-h-[calc(100vh-80px)] pt-[80px] bg-[#f5f7ff] p-6">
+      <AnimatePresence>
+        {showAddMachinePopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className="bg-white rounded-xl p-6 w-full max-w-md"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-[#3D52A0]">Add Machine to Your Account</h3>
+                <button 
+                  onClick={handleClosePopup}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <FaClose />
+                </button>
+              </div>
+              
+              <form onSubmit={handleAddMachineToUser}>
+                <div className="mb-4">
+                  <label htmlFor="machineId" className="block text-sm font-medium text-gray-700 mb-1">
+                    Machine ID
+                  </label>
+                  <input
+                    type="text"
+                    id="machineId"
+                    value={machineId}
+                    onChange={(e) => setMachineId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#7091E6]"
+                    placeholder="Enter the machine ID"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter the ID of the machine you want to add to your account
+                  </p>
+                </div>
+                
+                {popupError && (
+                  <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-sm">
+                    {popupError}
+                  </div>
+                )}
+                
+                {popupSuccess && (
+                  <div className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-sm">
+                    {popupSuccess}
+                  </div>
+                )}
+                
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleClosePopup}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="px-4 py-2 text-sm font-medium text-white bg-[#3D52A0] rounded-md hover:bg-[#7091E6] disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                      </span>
+                    ) : (
+                      'Add Machine'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <motion.div 
         className="max-w-7xl mx-auto"
         initial="hidden"

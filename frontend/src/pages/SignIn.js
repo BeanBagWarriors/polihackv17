@@ -48,7 +48,7 @@ const SignIn = () => {
       dispatch({type: 'LOGIN', payload: json});
       setIsLoading(false);
       navigate('/dashboard');
-  }
+    }
   };
 
   const toggleShowPassword = () => {

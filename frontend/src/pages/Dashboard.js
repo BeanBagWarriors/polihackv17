@@ -20,17 +20,16 @@ import {
   FaTruck,
   FaTimes as FaClose
 } from 'react-icons/fa';
-
+import { useAuthContext } from '../Hooks/useAuthContext';
+import NotFound from './NotFound';
 const Dashboard = () => {
+  const { user } = useAuthContext();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [vendingMachines, setVendingMachines] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [lowStockAlerts, setLowStockAlerts] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [editingMachine, setEditingMachine] = useState(null);
-  const [newMachineName, setNewMachineName] = useState("");
-  const [showAlertsPopup, setShowAlertsPopup] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
   // Animation variants
@@ -53,116 +52,38 @@ const Dashboard = () => {
     }
   };
 
-  const popupVariants = {
-    hidden: { opacity: 0, y: -20, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.3, ease: "easeOut" }
-    },
-    exit: {
-      opacity: 0,
-      y: -20,
-      scale: 0.95,
-      transition: { duration: 0.2, ease: "easeIn" }
-    }
-  };
 
-  // Mock data - replace with API call
   useEffect(() => {
     const fetchData = async () => {
-      // Simulate API call
-      setTimeout(() => {
-        const mockData = [
-          {
-            id: 1,
-            name: "Campus Center",
-            location: "University Main Building",
-            lastUpdated: "2023-07-15T14:32:00",
-            revenue: 1245.80,
-            stock: {
-              total: 120,
-              remaining: 87,
-              lowStock: false
-            },
-            cashDeposit: {
-              full: false
-            },
-            coordinates: {
-              lat: 40.7128,
-              lng: -74.0060
-            }
+      setIsLoading(true);
+        const response = await fetch(`${process.env.REACT_APP_API}/api/machine/getUserMachines/${user?.username}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
           },
-          {
-            id: 2,
-            name: "Office Park",
-            location: "Building A, Floor 2",
-            lastUpdated: "2023-07-15T15:45:00",
-            revenue: 876.50,
-            stock: {
-              total: 150,
-              remaining: 42,
-              lowStock: true
-            },
-            cashDeposit: {
-              full: true
-            },
-            coordinates: {
-              lat: 40.7200,
-              lng: -74.0100
-            }
-          },
-          {
-            id: 3,
-            name: "Shopping Mall",
-            location: "Food Court",
-            lastUpdated: "2023-07-14T09:15:00",
-            revenue: 2134.25,
-            stock: {
-              total: 180,
-              remaining: 65,
-              lowStock: false
-            },
-            cashDeposit: {
-              full: false
-            },
-            coordinates: {
-              lat: 40.7300,
-              lng: -74.0050
-            }
-          },
-          {
-            id: 4,
-            name: "Train Station",
-            location: "Main Terminal",
-            lastUpdated: "2023-07-15T16:10:00",
-            revenue: 945.75,
-            stock: {
-              total: 100,
-              remaining: 23,
-              lowStock: true
-            },
-            cashDeposit: {
-              full: true
-            },
-            coordinates: {
-              lat: 40.7500,
-              lng: -74.0080
-            }
-          },
-        ];
+        });
 
-        setVendingMachines(mockData);
+        const json = await response.json();
+
+        if(!response.ok){
+          console.log(json.error);
+          setIsLoading(false);
+        }
+      
+        if(response.ok){
+          setIsLoading(false);
+          setVendingMachines(json);
+        }
         
         // Calculate total revenue
-        const total = mockData.reduce((sum, machine) => sum + machine.revenue, 0);
+        console.log(json);
+        const total = json.reduce((sum, machine) => sum + machine.totalRevenue, 0);
         setTotalRevenue(total);
         
-        // Generate notifications based on machine statuses
+        // // Generate notifications based on machine statuses
         const alerts = [];
-        mockData.forEach(machine => {
-          if (machine.stock.lowStock) {
+        json.forEach(machine => {
+          if (machine.isStockFull) {
             alerts.push({
               id: `stock-${machine.id}-${Date.now()}`,
               machineId: machine.id,
@@ -175,7 +96,7 @@ const Dashboard = () => {
             });
           }
           
-          if (machine.cashDeposit.full) {
+          if (machine.isCashFull) {
             alerts.push({
               id: `cash-${machine.id}-${Date.now()}`,
               machineId: machine.id,
@@ -189,15 +110,15 @@ const Dashboard = () => {
           }
         });
         
-        setNotifications(alerts);
         setLowStockAlerts(alerts.length);
+        setNotifications(alerts);
         
         setIsLoading(false);
-      }, 1000);
     };
 
-    fetchData();
-  }, []);
+    if(user)
+      fetchData();
+  }, [user]);
 
   // Filter vending machines based on search
   const filteredMachines = vendingMachines.filter(machine => {
@@ -213,64 +134,11 @@ const Dashboard = () => {
     navigate('/analytics');
   };
 
-  // Start editing a machine name
-  const startEditing = (machine) => {
-    setEditingMachine(machine.id);
-    setNewMachineName(machine.name);
-  };
-
-  // Cancel editing
-  const cancelEditing = () => {
-    setEditingMachine(null);
-    setNewMachineName("");
-  };
-
-  // Save the new machine name
-  const saveMachineName = (machineId) => {
-    if (newMachineName.trim() === "") return;
-    
-    // Update the machine name
-    setVendingMachines(prevMachines => 
-      prevMachines.map(machine => 
-        machine.id === machineId 
-          ? { ...machine, name: newMachineName } 
-          : machine
-      )
-    );
-    
-    // Reset editing state
-    setEditingMachine(null);
-    setNewMachineName("");
-  };
-
-  // Toggle alerts popup
-  const toggleAlertsPopup = () => {
-    setShowAlertsPopup(!showAlertsPopup);
-  };
-
-  // Format relative time
-  const formatRelativeTime = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - date) / 1000);
-    
-    if (diffInSeconds < 60) {
-      return 'Just now';
-    }
-    
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-    }
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-    }
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-  };
+  if(!user){
+    return(
+      <NotFound/>
+    )
+  }
 
   return (
     <div className="mt-10 min-h-[calc(100vh-80px)] pt-[80px] bg-[#f5f7ff] p-6">
@@ -298,7 +166,7 @@ const Dashboard = () => {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-[#8697C4] text-sm font-medium">Total Revenue</p>
-                <h3 className="text-3xl font-bold text-[#3D52A0] mt-1">${totalRevenue.toFixed(2)}</h3>
+                <h3 className="text-3xl font-bold text-[#3D52A0] mt-1">${totalRevenue}</h3>
                 <p className="text-green-500 text-sm mt-1">+5.3% from last month</p>
               </div>
               <div className="bg-[#EDE8F5] p-3 rounded-lg">
@@ -387,39 +255,14 @@ const Dashboard = () => {
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex-grow">
-                      {editingMachine === machine.id ? (
-                        <div className="flex items-center">
-                          <input
-                            type="text"
-                            className="w-full border-b-2 border-[#3D52A0] focus:outline-none focus:border-[#7091E6] text-lg font-bold text-[#3D52A0] bg-transparent mr-2"
-                            value={newMachineName}
-                            onChange={(e) => setNewMachineName(e.target.value)}
-                            autoFocus
-                          />
-                          <button 
-                            onClick={() => saveMachineName(machine.id)}
-                            className="text-green-500 hover:text-green-600 ml-1"
-                          >
-                            <FaCheck size={16} />
-                          </button>
-                          <button 
-                            onClick={cancelEditing}
-                            className="text-red-500 hover:text-red-600 ml-1"
-                          >
-                            <FaTimes size={16} />
-                          </button>
-                        </div>
-                      ) : (
                         <div className="flex items-center">
                           <h3 className="text-lg font-bold text-[#3D52A0]">{machine.name}</h3>
                           <button 
-                            onClick={() => startEditing(machine)}
                             className="text-[#8697C4] hover:text-[#3D52A0] ml-2"
                           >
                             <FaEdit size={14} />
                           </button>
                         </div>
-                      )}
                       <p className="text-[#8697C4] text-sm">{machine.location}</p>
                     </div>
                   </div>
@@ -427,18 +270,20 @@ const Dashboard = () => {
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <div className="bg-[#f5f7ff] p-3 rounded-lg">
                       <p className="text-[#8697C4] text-xs">Revenue</p>
-                      <p className="font-bold text-[#3D52A0]">${machine.revenue.toFixed(2)}</p>
+                      <p className="font-bold text-[#3D52A0]">${machine.totalRevenue}</p>
                     </div>
                     <div className="bg-[#f5f7ff] p-3 rounded-lg">
-                      <p className="text-[#8697C4] text-xs">Stock</p>
+                      <p className="text-[#8697C4] text-xs mb-2">Stock</p>
                       <div className="flex items-center">
                         <div className="w-full bg-[#ADBBDA] rounded-full h-2.5 mr-2">
                           <div 
-                            className={`h-2.5 rounded-full ${machine.stock.lowStock ? 'bg-red-500' : 'bg-green-500'}`}
-                            style={{ width: `${(machine.stock.remaining / machine.stock.total) * 100}%` }}
+                            className={`h-2.5 rounded-full ${machine.isStockFull ? 'bg-red-500' : 'bg-green-500'}`}
+                            style={{ width: `${machine.isStockFull ? '90%' : '40%'}%` }}
                           ></div>
                         </div>
-                        <span className="text-[#3D52A0] text-xs font-medium">{Math.round((machine.stock.remaining / machine.stock.total) * 100)}%</span>
+                        <span className="text-[#3D52A0] text-xs font-medium">
+                          {machine.isStockFull ? 'Low' : 'OK'}
+                        </span>
                       </div>
                     </div>
                     
@@ -447,9 +292,9 @@ const Dashboard = () => {
                       <p className="text-[#8697C4] text-xs">Cash Available Space</p>
                       <div className="flex items-center mt-1">
                         <div className="flex-grow flex items-center">
-                          <div className={`h-3 w-3 rounded-full mr-2 ${machine.cashDeposit?.full ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                          <div className={`h-3 w-3 rounded-full mr-2 ${machine.isCashFull ? 'bg-red-500' : 'bg-green-500'}`}></div>
                           <span className="text-[#3D52A0] text-xs font-medium">
-                            {machine.cashDeposit?.full ? 'Full - Needs Collection' : 'Available'}
+                            {machine.isCashFull ? 'Full - Needs Collection' : 'Available'}
                           </span>
                         </div>
                       </div>

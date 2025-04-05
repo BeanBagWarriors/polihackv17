@@ -68,6 +68,16 @@ const machineSchema = new mongoose.Schema({
         required: true,
         default: [],
     },
+    isStockFull:{
+        type: Boolean,
+        required: true,
+        default: false,
+    },
+    isCashFull:{
+        type: Boolean,
+        required: true,
+        default: false,
+    }
 
 }, {timestamps: true});
 

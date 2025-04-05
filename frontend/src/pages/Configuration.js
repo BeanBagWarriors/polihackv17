@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import { motion } from 'framer-motion';
+import { useParams } from 'react-router-dom';
 import { 
   FaSave, 
   FaEdit, 
@@ -9,25 +10,11 @@ import {
   FaSort,
   FaTimes
 } from 'react-icons/fa';
+import { useAuthContext } from '../Hooks/useAuthContext';
+import NotFound from './NotFound';
+
 
 // Mock API service - replace with actual backend calls
-const apiService = {
-  // Get machine data including products
-  getMachineData: async (machineId) => {
-    // This would be an API call to your backend
-    // For now, using mock data
-    return {
-      id: machineId || 1,
-      name: " ",
-      products: []  // Empty products array
-    };
-  },
-  
-  saveMachineConfiguration: async (machineConfig) => {
-    console.log("Saving configuration:", machineConfig);
-    return { success: true, id: machineConfig.id };
-  }
-};
 
 // Helper function
 const formatCurrency = (value) => {
@@ -44,22 +31,30 @@ const ProductItem = ({ item, onEdit }) => {
     <div className="bg-white rounded-lg border border-[#ADBBDA] p-4 mb-3 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div className="flex items-center flex-1">
-          <div className="text-3xl mr-4">{item.image}</div>
           <div className="flex-1">
             <h3 className="font-medium text-[#3D52A0]">{item.name}</h3>
-            <div className="flex items-center text-sm mt-1">
+            <div className="flex flex-wrap items-center text-sm mt-1">
               <div className="text-[#8697C4] mr-4">
-                <span className="font-medium text-green-600">{formatCurrency(item.price)}</span> per unit
+                <span className="font-medium text-green-600">{formatCurrency(item.retailPrice)}</span> per unit
+              </div>
+              <div className="text-[#8697C4] mr-4">
+                Original price: <span className="font-medium">{formatCurrency(item.originalPrice)}</span>
+              </div>
+              <div className="text-[#8697C4] mr-4">
+                Retail price: <span className="font-medium">{formatCurrency(item.retailPrice)}</span>
               </div>
               <div className="text-[#8697C4]">
-                Quantity: <span className="font-medium">{item.quantity}</span>
+                Quantity: <span className="font-medium">{item.amount}</span>
               </div>
+            </div>
+            <div className="text-xs text-[#8697C4] mt-1">
+              Expiry date: <span className="font-medium">{item.expiryDate !== "unset" ? item.expiryDate : "Not set"}</span>
             </div>
           </div>
         </div>
         
         <div className="flex items-center">
-          <p className="mr-4 font-medium">{formatCurrency(item.price * item.quantity)}</p>
+          <p className="mr-4 font-medium">{formatCurrency(item.retailPrice * item.amount)}</p>
           <button 
             className="text-[#3D52A0] hover:text-[#7091E6] p-2"
             onClick={() => onEdit(item)}
@@ -73,14 +68,27 @@ const ProductItem = ({ item, onEdit }) => {
 };
 
 // Edit Product Modal
+
+
 const EditProductModal = ({ item, onSave, onClose }) => {
-  const [price, setPrice] = useState(item.price || 0);
+  const [name, setName] = useState(item.name || "");
+  const [retailPrice, setRetailPrice] = useState(item.retailPrice || 0);
+  const [originalPrice, setOriginalPrice] = useState(item.originalPrice || 0);
+  const [amount, setAmount] = useState(item.amount || 0);
+  const [expiryDate, setExpiryDate] = useState(item.expiryDate === "unset" ? "" : item.expiryDate);
   
   const handleSave = () => {
-    onSave({
+    const updatedProduct = {
       ...item,
-      price
-    });
+      key: item.key,
+      name,
+      retailPrice,
+      originalPrice,
+      amount: parseInt(amount) || 0, // Asigură-te că este un număr întreg
+      expiryDate: expiryDate || "unset"
+    };
+    console.log("Saving updated product:", updatedProduct); // Log pentru debug
+    onSave(updatedProduct);
   };
   
   return (
@@ -92,10 +100,7 @@ const EditProductModal = ({ item, onSave, onClose }) => {
         exit={{ scale: 0.9, opacity: 0 }}
       >
         <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center">
-            <span className="text-3xl mr-3">{item.image}</span>
-            <h3 className="text-xl font-bold text-[#3D52A0]">{item.name}</h3>
-          </div>
+          <h3 className="text-xl font-bold text-[#3D52A0]">Edit Product</h3>
           <button 
             className="text-[#8697C4] hover:text-[#3D52A0]"
             onClick={onClose}
@@ -104,8 +109,20 @@ const EditProductModal = ({ item, onSave, onClose }) => {
           </button>
         </div>
         
-        <div className="mb-6">
-          <label className="block text-[#8697C4] text-sm font-medium mb-2">Price ($)</label>
+        {/* Product Name */}
+        <div className="mb-4">
+          <label className="block text-[#8697C4] text-sm font-medium mb-2">Product Name</label>
+          <input
+            type="text"
+            className="w-full px-4 py-2 border border-[#ADBBDA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7091E6]"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        
+        {/* Retail Price */}
+        <div className="mb-4">
+          <label className="block text-[#8697C4] text-sm font-medium mb-2">Retail Price ($)</label>
           <div className="relative">
             <span className="absolute left-3 top-3 text-[#8697C4]">$</span>
             <input
@@ -113,20 +130,40 @@ const EditProductModal = ({ item, onSave, onClose }) => {
               step="0.01"
               min="0"
               className="w-full pl-8 pr-4 py-2 border border-[#ADBBDA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7091E6]"
-              value={price}
-              onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+              value={retailPrice}
+              onChange={(e) => setRetailPrice(parseFloat(e.target.value) || 0)}
             />
           </div>
-          <p className="text-xs text-[#8697C4] mt-1">Default price: {formatCurrency(item.defaultPrice)}</p>
+        </div>
+        
+        {/* Amount */}
+        <div className="mb-4">
+          <label className="block text-[#8697C4] text-sm font-medium mb-2">Quantity</label>
+          <input
+            type="number"
+            min="0"
+            className="w-full px-4 py-2 border border-[#ADBBDA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7091E6]"
+            value={amount}
+            onChange={(e) => setAmount(parseInt(e.target.value) || 0)}
+          />
+        </div>
+        
+        {/* Expiry Date */}
+        <div className="mb-6">
+          <label className="block text-[#8697C4] text-sm font-medium mb-2">Expiry Date</label>
+          <input
+            type="date"
+            className="w-full px-4 py-2 border border-[#ADBBDA] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7091E6]"
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+          />
+          <p className="text-xs text-[#8697C4] mt-1">Leave empty if no expiry date</p>
         </div>
         
         <div className="bg-[#f5f7ff] p-4 rounded-lg mb-6">
           <div className="flex justify-between text-[#3D52A0]">
             <span>Total value:</span>
-            <span className="font-bold">{formatCurrency(price * item.quantity)}</span>
-          </div>
-          <div className="text-[#8697C4] text-sm mt-2">
-            Quantity: {item.quantity} units
+            <span className="font-bold">{formatCurrency(retailPrice * amount)}</span>
           </div>
         </div>
         
@@ -151,9 +188,12 @@ const EditProductModal = ({ item, onSave, onClose }) => {
 
 // Main Configuration component
 const Configuration = () => {
+  const { user } = useAuthContext();
   // Get machine ID from URL params if needed
   // const { machineId } = useParams(); // Uncomment if using React Router with URL params
-  const machineId = 1; // Hardcoded for now, replace with actual ID
+  const {id} = useParams(); // Get the machine ID from the URL
+  const machineId = id;
+  console.log("Machine ID from URL:", machineId); // Log the machine ID for debugging
   
   // State for machine configuration
   const [machineName, setMachineName] = useState("");
@@ -168,6 +208,7 @@ const Configuration = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [machineData, setMachineData] = useState(null);
   
   // Load initial data
   useEffect(() => {
@@ -177,9 +218,24 @@ const Configuration = () => {
       
       try {
         // Load machine data including products
-        const machineData = await apiService.getMachineData(machineId);
-        setMachineName(machineData.name);
-        setMachineProducts(machineData.products);
+        //const machineData = await apiService.getMachineData(machineId);
+
+        const response = await fetch(`${process.env.REACT_APP_API}/api/machine/getMachineContent/${machineId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const json = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(json.error || "Failed to fetch machine data");
+        }
+        
+        setMachineName(json.name);
+        setMachineProducts(json.content);
+        console.log("Machine data:", json);
+        setMachineData(json);
       } catch (err) {
         console.error("Error loading machine data:", err);
         setError("Failed to load machine data. Please try again.");
@@ -197,11 +253,54 @@ const Configuration = () => {
   };
   
   // Handle saving product changes
-  const handleSaveProduct = (updatedProduct) => {
-    setMachineProducts(machineProducts.map(product => 
-      product.id === updatedProduct.id ? updatedProduct : product
-    ));
-    setEditingProduct(null);
+  // Handle saving product changes
+  const handleSaveProduct = async (updatedProduct) => {
+    try {
+      // Pregătește datele pentru API
+      const payload = {
+        id: machineId,
+        key: updatedProduct.key,
+        name: updatedProduct.name,
+        retailPrice: updatedProduct.retailPrice,
+        originalPrice: updatedProduct.originalPrice == 0 ? updatedProduct.originalPrice = updatedProduct.retailPrice : updatedProduct.originalPrice,
+        expiryDate: updatedProduct.expiryDate,
+        amount: updatedProduct.amount // Asigură-te că acest câmp este inclus
+      };
+      
+      console.log("Sending payload:", payload); // Log pentru debug
+      
+      // Apelează endpoint-ul
+      const response = await fetch(`${process.env.REACT_APP_API}/api/machine/setMachineContent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.error || "Failed to update product");
+      }
+      
+      // Actualizează state-ul local după succes
+      setMachineProducts(machineProducts.map(product => 
+        product.key === updatedProduct.key ? updatedProduct : product
+      ));
+      
+      // Afișează un mesaj de succes (opțional)
+      setSuccessMessage("Product updated successfully!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+      
+      // Închide modalul de editare
+      setEditingProduct(null);
+      
+    } catch (error) {
+      console.error("Error updating product:", error);
+      setError("Failed to update product: " + error.message);
+      setTimeout(() => setError(null), 5000);
+    }
   };
   
   // Sort products
@@ -213,16 +312,16 @@ const Configuration = () => {
     } else if (sortKey === 'price') {
       return a.price - b.price;
     } else if (sortKey === 'quantity') {
-      return a.quantity - b.quantity;
+      return a.amount - b.amount;
     }
     return 0;
   });
   
   // Calculate machine stats
-  const totalItems = machineProducts.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const totalItems = machineProducts.reduce((sum, item) => sum + (item.amount || 0), 0);
   
   const totalRevenue = machineProducts.reduce((sum, item) => {
-    return sum + (item.price || 0) * (item.quantity || 0);
+    return sum + (item.retailPrice || 0) * (item.amount || 0);
   }, 0);
   
   // Navigate back to dashboard
@@ -231,42 +330,7 @@ const handleBackToDashboard = () => {
   };
   
   // Handle saving the configuration
-  const handleSaveConfiguration = async () => {
-    if (!machineName) {
-      setError("Please provide a machine name.");
-      return;
-    }
-    
-    setIsSaving(true);
-    setError(null);
-    setSuccessMessage(null);
-    
-    try {
-      const configData = {
-        id: machineId,
-        name: machineName,
-        products: machineProducts.map(product => ({
-          id: product.id,
-          price: product.price,
-        }))
-      };
-      
-      const result = await apiService.saveMachineConfiguration(configData);
-      
-      if (result.success) {
-        setSuccessMessage("Vending machine configuration saved successfully!");
-        // Redirect after a short delay
-        setTimeout(() => {
-          handleBackToDashboard();
-        }, 1500);
-      }
-    } catch (err) {
-      console.error("Error saving configuration:", err);
-      setError("Failed to save configuration. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+
   
   // If still loading initial data
   if (isLoading) {
@@ -275,6 +339,13 @@ const handleBackToDashboard = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#3D52A0]"></div>
       </div>
     );
+  }
+
+
+  if(!user){
+    return(
+      <NotFound/>
+    )
   }
   
   return (
@@ -294,18 +365,6 @@ const handleBackToDashboard = () => {
               <p className="text-[#8697C4] mt-1">Set prices for products in your vending machine</p>
             </div>
           </div>
-          <button 
-            className="bg-[#3D52A0] text-white px-6 py-3 rounded-lg hover:bg-[#7091E6] transition-colors flex items-center mt-4 md:mt-0"
-            onClick={handleSaveConfiguration}
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-            ) : (
-              <FaSave className="mr-2" />
-            )}
-            Save Configuration
-          </button>
         </div>
         
         {/* Error and success messages */}
@@ -381,12 +440,24 @@ const handleBackToDashboard = () => {
             )}
           </div>
           
-          <div className="text-center p-8 border border-dashed border-[#ADBBDA] rounded-lg">
-            <FaShoppingCart className="mx-auto text-4xl text-[#7091E6] mb-4" />
-            <h3 className="text-lg font-bold text-[#3D52A0]">No Products Available</h3>
-            <p className="text-[#8697C4] mb-6">This machine has no products configured yet</p>
-            <p className="text-[#8697C4]">Products will appear here after they are assigned to this machine</p>
-          </div>
+          {machineProducts.length > 0 ? (
+            <div className="max-h-[400px] overflow-y-auto">
+              {sortedProducts.map((item) => (
+                <ProductItem 
+                  key={item.id}
+                  item={item}
+                  onEdit={handleEditProduct}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center p-8 border border-dashed border-[#ADBBDA] rounded-lg">
+              <FaShoppingCart className="mx-auto text-4xl text-[#7091E6] mb-4" />
+              <h3 className="text-lg font-bold text-[#3D52A0]">No Products Available</h3>
+              <p className="text-[#8697C4] mb-6">This machine has no products configured yet</p>
+              <p className="text-[#8697C4]">Products will appear here after they are assigned to this machine</p>
+            </div>
+          )}
         </div>
         
         {/* Edit Product Modal */}

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaLightbulb, FaRobot, FaArrowUp, FaChartLine, FaMapMarkerAlt, FaCalendarAlt, FaFilter } from 'react-icons/fa';
+import { useAuthContext } from '../Hooks/useAuthContext';
+import NotFound from './NotFound';
 
 // API service to handle backend requests
 const apiService = {
@@ -162,6 +164,7 @@ const LoadingSpinner = () => (
 
 // Main Analytics component
 const Analytics = () => {
+  const { user } = useAuthContext();
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState([]);
   const [machineRecommendations, setMachineRecommendations] = useState([]);
@@ -224,6 +227,12 @@ const Analytics = () => {
   const filteredMachineRecommendations = selectedMachine === "all" ? 
     machineRecommendations : 
     machineRecommendations.filter(rec => rec.machineId.toString() === selectedMachine.toString());
+
+    if(!user){
+      return(
+        <NotFound/>
+      )
+    }
 
   return (
     <div className="min-h-[calc(100vh-80px)] pt-[80px] bg-[#f5f7ff] p-6">

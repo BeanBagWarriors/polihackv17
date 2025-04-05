@@ -194,7 +194,7 @@ const removeItemsFromContent = async (req, res) =>{
 
 const setMachineContent = async (req, res) =>{
     try{
-        const {id, key, expiryDate, originalPrice, retailPrice, name} = req.body || {};
+        const {id, key, expiryDate, originalPrice, retailPrice, name, amount} = req.body || {};
 
         const machine = await machineModel.findOne({id});
 
@@ -211,9 +211,12 @@ const setMachineContent = async (req, res) =>{
                 expiryDate ? item.expiryDate = expiryDate : item.expiryDate;
                 originalPrice ? item.originalPrice = originalPrice : item.originalPrice;
                 retailPrice ? item.retailPrice = retailPrice : item.retailPrice;
+                originalPrice == 0 ? item.originalPrice = item.retailPrice : item.originalPrice;
                 name ? item.name = name : item.name;
+                amount ? item.amount = amount : item.amount;
             }
         });
+
 
         await machine.save();
 
@@ -245,6 +248,22 @@ const getUserMachines = async (req, res) =>{
     }
 }
 
+const updateMachineStockMoney = async (req, res) =>{
+    try{
+        const {id} = req.body || {};
+
+        const machine = await machineModel.findOneAndUpdate({id}, {$set: {isCashFull: true}}); 
+
+        if(!machine){
+            return res.status(400).json({error: 'Machine does not exist!'});
+        }
+
+        return res.status(200).json({message: 'Machine is now full!'});
+    }catch(error){
+        res.status(500).json({error: error.message});
+    }
+}
+
 module.exports = {
     createMachine,
     addMachineToUser,
@@ -252,5 +271,6 @@ module.exports = {
     addItemsToContent,
     removeItemsFromContent,
     setMachineContent,
-    getUserMachines
+    getUserMachines,
+    updateMachineStockMoney
 }

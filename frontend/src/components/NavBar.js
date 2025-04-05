@@ -70,18 +70,31 @@ const NavBar = () => {
         <nav className="fixed top-0 left-0 w-full h-[80px] bg-[#3D52A0] shadow-md z-50 px-4 lg:px-8 flex items-center justify-between">
             {/* Logo & Navigation Items */}
             <div className="flex items-center gap-8">
+                {user ? 
                 <button 
                     onClick={navigateToDashboard}
                     className="flex items-center mb-2 focus:outline-none hover:opacity-80 transition-opacity text-white font-bold text-2xl"
                 >
                     MyVendingMachine
                 </button>
+                :
+                <button 
+                    onClick={() => navigate('/')}
+                    className="flex items-center mb-2 focus:outline-none hover:opacity-80 transition-opacity text-white font-bold text-2xl"
+                >
+                    MyVendingMachine
+                </button>
+                }
                 
                 {/* Desktop Navigation Items */}
-                {user &&
+                {user ?
                     <div className="hidden lg:flex items-center gap-6">
-                        <Link to="/dashboard" className="text-[#EDE8F5] hover:text-white transition-colors">Dashboard</Link>
-                        <Link to="/analytics" className="text-[#EDE8F5] hover:text-white transition-colors">Analytics</Link>
+                        <p onClick={() => navigate('/dashboard')} className="text-[#EDE8F5] cursor-pointer hover:text-white transition-colors">Dashboard</p>
+                        <p onClick={() => navigate('/analytics')} className="text-[#EDE8F5] cursor-pointer hover:text-white transition-colors">Analytics</p>
+                    </div>
+                :
+                    <div className="hidden lg:flex items-center gap-6">
+                        <p onClick={() => navigate('/product')} className="text-[#EDE8F5] cursor-pointer hover:text-white transition-colors">Product</p>
                     </div>
                 }
             </div>

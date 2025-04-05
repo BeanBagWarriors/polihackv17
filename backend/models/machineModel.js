@@ -1,7 +1,34 @@
 const mongoose = require('mongoose');
 
-const machineSchema = new mongoose.Schema({
+const contentItemSchema = new mongoose.Schema({
     key:{
+        type: String,
+        required: true,
+    },
+    expiryDate:{
+        type: String,
+        required: true,
+    },
+    originalPrice:{
+        type: Number,
+        required: true,
+    },
+    retailPrice:{
+        type: Number,
+        required: true,
+    },
+    amount:{
+        type: Number,
+        required: true,
+    },
+    name:{
+        type: String,
+        required: true,
+    }
+  }, { _id: false });
+
+const machineSchema = new mongoose.Schema({
+    id:{
         type: String,
         required: true,
         unique: true,
@@ -12,14 +39,15 @@ const machineSchema = new mongoose.Schema({
         default: 'Vending Machine',
     },
     content:{
-        type: Array,
+        type: [contentItemSchema],
         required: true,
         default: [],
     },
-    maxPins:{
+    location:{
         type: String,
         required: true,
-    }
+        default: 'unset',
+    },
 }, {timestamps: true});
 
 const machineCollection = mongoose.model('Machines', machineSchema);

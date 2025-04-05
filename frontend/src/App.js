@@ -4,6 +4,7 @@ import NavBar from './components/NavBar';
 import Map from './pages/Map';
 import Dashboard from './pages/Dashboard';
 import Analytics from './pages/Analytics';
+import Configuration from './pages/Configuration';
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path = "/map" element={<Map/>}/>
           <Route path = "/dashboard" element={<Dashboard/>}/>
           <Route path = "/analytics" element={<Analytics/>}/>
+          <Route path = "/configuration" element={<Configuration/>}/>
         </Routes>
       </div>
     </BrowserRouter>

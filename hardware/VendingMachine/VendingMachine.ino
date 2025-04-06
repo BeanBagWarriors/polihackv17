@@ -2,14 +2,14 @@
 #include <HTTPClient.h>
 
 // Replace with your WiFi credentials
-const char* ssid     = "cometa";
-const char* password = "parolafaina";
+const char* ssid     = "cloudflight-guest";
+const char* password = "digitalfuture";
 
 const char* machineId = "123D"; // Unique machine ID
 const int irSensorPin = 32; // IR sensor input pin
 
 // Replace with your server endpoint
-const char* serverUrl = "https://webhook.site/cca3ce70-9f8b-4c2a-aa69-1c8999c8ea81/api/machine";
+const char* serverUrl = "https://polihackv17.onrender.com/api/machine";
 
 struct Button {
   int pin;

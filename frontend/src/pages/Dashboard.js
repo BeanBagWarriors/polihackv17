@@ -402,6 +402,7 @@ const Dashboard = () => {
                         <div className="flex items-center">
                           <h3 className="text-lg font-bold text-[#3D52A0]">{machine.name}</h3>
                           <button 
+                            onClick={() => navigate(`/machine/${machine.id}/stock`)}
                             className="text-[#8697C4] hover:text-[#3D52A0] ml-2"
                           >
                             <FaEdit size={14} />
@@ -454,7 +455,7 @@ const Dashboard = () => {
                       See on Map
                     </button>
                     <Link
-                      to={`/machine/${machine.id}/stock`}
+                      to={`/inventory/${machine.id}`}
                       className="flex-1 bg-[#EDE8F5] text-[#3D52A0] py-2 rounded-lg text-sm font-medium text-center hover:bg-[#ADBBDA] transition-colors flex justify-center items-center"
                     >
                       <FaBoxOpen className="mr-2" />

@@ -91,6 +91,8 @@ const NavBar = () => {
                     <div className="hidden lg:flex items-center gap-6">
                         <p onClick={() => navigate('/dashboard')} className="text-[#EDE8F5] cursor-pointer hover:text-white transition-colors">Dashboard</p>
                         <p onClick={() => navigate('/analytics')} className="text-[#EDE8F5] cursor-pointer hover:text-white transition-colors">Analytics</p>
+                        <p onClick={() => navigate('/map')} className="text-[#EDE8F5] cursor-pointer hover:text-white transition-colors">Map</p>
+                    
                     </div>
                 :
                     <div className="hidden lg:flex items-center gap-6">

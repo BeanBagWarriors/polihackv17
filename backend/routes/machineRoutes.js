@@ -7,7 +7,9 @@ const {
     removeItemsFromContent,
     setMachineContent,
     getUserMachines,
-    updateMachineStockMoney
+    updateMachineStockMoney,
+    getMachineRecommendations,
+    getMachinePerformanceMetrics
 } = require('../controllers/machineController');
 
 const router = express.Router();
@@ -20,5 +22,7 @@ router.post('/removeItemsFromContent', removeItemsFromContent);
 router.post('/setMachineContent', setMachineContent);
 router.get('/getUserMachines/:email', getUserMachines);
 router.post('/updateMachineStockMoney', updateMachineStockMoney);
+router.get('/getMachineRecommendations/:id', getMachineRecommendations);
+router.get('/getPerformanceMetrics/:id/:timeRange', getMachinePerformanceMetrics);
 
 module.exports = router;

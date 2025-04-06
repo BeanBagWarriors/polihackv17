@@ -9,7 +9,7 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Product from './pages/Product';
 import NotFound from './pages/NotFound';
-
+import InventoryPage from './pages/InventoryPage';
 
 function App() {
   return (
@@ -27,7 +27,7 @@ function App() {
           <Route path = "/signin" element={<SignIn/>}/>
           <Route path = "/signup" element={<SignUp/>}/>
           <Route path = "/product" element={<Product/>}/>
-
+          <Route path = "/inventory/:id" element={<InventoryPage/>}/>
         </Routes>
       </div>
     </BrowserRouter>

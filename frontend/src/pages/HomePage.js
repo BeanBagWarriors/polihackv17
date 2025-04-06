@@ -558,7 +558,7 @@ const HomePage = () => {
             justifyContent: 'center',
           }}
         >
-          <div className="z-50 relative max-w-6xl w-full px-8 py-20 content-section relative z-10"> {/* Increased padding */}
+          <div className="z-50 relative max-w-6xl w-full px-8 py-20 content-section "> {/* Increased padding */}
             <motion.div 
               className="text-center mb-20" /* Increased spacing */
               initial="hidden"
@@ -600,7 +600,7 @@ const HomePage = () => {
                   <h3 className="text-2xl font-bold text-[#3D52A0] mb-4">One-Time Device Fee</h3>
                   <p className="text-[#8697C4] mb-6">Pay only once for the hardware device. No monthly subscriptions or hidden fees.</p>
                   <div className="mb-6">
-                    <p className="text-4xl font-bold text-[#3D52A0]">$10</p>
+                    <p className="text-4xl font-bold text-[#3D52A0]">$40</p>
                     <p className="text-[#8697C4] text-sm">per device, one-time payment</p>
                   </div>
                 </div>
@@ -663,21 +663,10 @@ const HomePage = () => {
                 Ready to transform your vending machine business with our risk-free approach? 
                 Check out our device specifications and see how easy it is to get started.
               </p>
-              
-              <motion.button
-                className=" bg-[#3D52A0] text-white px-10 py-5 rounded-xl text-xl font-medium hover:bg-[#7091E6] transition-all shadow-lg flex items-center"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/product')} // Navigate to Product.js using useNavigate
-              >
-                Get Started
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </motion.button>
             </motion.div>
           </div>
         </ParallaxLayer>
+        
 
         {/* Decorative stars - spans all pages */}
         <ParallaxLayer offset={0} speed={0.1} factor={4}>
@@ -786,6 +775,18 @@ const HomePage = () => {
           </div>
         </ParallaxLayer>
       </Parallax>
+      {/* Fixed action button that sits above all Parallax layers */}
+<div className="fixed bottom-10 right-10 z-[9999]">
+  <a 
+    href="/product" 
+    className="bg-[#3D52A0] text-white px-10 py-5 rounded-xl text-xl font-medium hover:bg-[#7091E6] transition-all shadow-lg flex items-center"
+  >
+    Get Started
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+    </svg>
+  </a>
+</div>
     </div>
   );
 };

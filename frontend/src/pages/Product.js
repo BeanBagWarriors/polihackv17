@@ -14,21 +14,28 @@ const Product = () => {
   
   // Define base and slot prices
   const prices = {
-    base: 10.00,
-    extraSlot: 2.99
+    base: 39.99,
+    extraSlotBundle: 1.99  // Price for every 8 extra slots
   };
 
   // Slot options - increasing by 8
-  const slotOptions = [8, 16, 24, 32, 40];
+  const slotOptions = [16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160];
   
-  // Calculate total price
+  // Calculate total price - now charging per 8 slots bundle
   const calculateTotal = () => {
     let total = prices.base * quantity;
     if (selectedSlots > 8) { // If more than base slots (8)
-      const extraSlots = selectedSlots - 8;
-      total += extraSlots * prices.extraSlot * quantity;
+      // Calculate how many 8-slot bundles are needed
+      const extraSlotBundles = Math.ceil((selectedSlots - 8) / 8);
+      total += extraSlotBundles * prices.extraSlotBundle * quantity;
     }
     return total.toFixed(2);
+  };
+
+  // Get the number of extra slot bundles
+  const getExtraSlotBundles = () => {
+    if (selectedSlots <= 8) return 0;
+    return Math.ceil((selectedSlots - 8) / 8);
   };
   
   // Form state
@@ -124,7 +131,7 @@ const Product = () => {
               <FaArrowLeft size={20} />
             </button>
             <div>
-              <h1 className="text-3xl font-bold text-[#3D52A0]">VendorPal Device</h1>
+              <h1 className="text-3xl font-bold text-[#3D52A0]">MyVendingMachine device</h1>
               <p className="text-[#8697C4] mt-1">Configure and purchase your monitoring module</p>
             </div>
           </div>
@@ -185,17 +192,28 @@ const Product = () => {
                   </div>
                 </div>
                 <div className="p-6">
-                  <h2 className="text-2xl font-bold text-[#3D52A0] mb-4">Vending Machine Monitor</h2>
-                  <p className="text-[#8697C4] mb-4">
-                    Our plug-and-play monitoring module connects to any vending machine to provide real-time data tracking, inventory management, and revenue reporting.
-                  </p>
-                  <div className="divide-y divide-[#ADBBDA]">
-                    <div className="py-3 flex justify-between">
-                      <span className="text-[#8697C4]">Connectivity</span>
-                      <span className="font-medium text-[#3D52A0]">WiFi + GPS (Included)</span>
+                    <h2 className="text-2xl font-bold text-[#3D52A0] mb-4">Vending Machine Monitor</h2>
+                    <p className="text-[#8697C4] mb-4">
+                        Our plug-and-play monitoring module connects to any vending machine to provide real-time data tracking, inventory management, and revenue reporting.
+                    </p>
+                    <div className="divide-y divide-[#ADBBDA]">
+                        <div className="py-3 flex justify-between">
+                            <span className="text-[#8697C4]">Dimensions</span>
+                            <span className="font-medium text-[#3D52A0]"> 75 × 50 × 10 mm</span>
+                        </div>
+                        <div className="py-3 flex justify-between">
+                            <span className="text-[#8697C4]">Weight</span>
+                            <span className="font-medium text-[#3D52A0]">150 grams</span>
+                        </div>
+                        <div className="py-3 flex justify-between">
+                            <span className="text-[#8697C4]">*Dimensions and weight may vary depending on the number of the slots*</span>
+                        </div>
+                        <div className="py-3 flex justify-between">
+                            <span className="text-[#8697C4]">Connectivity</span>
+                            <span className="font-medium text-[#3D52A0]">WiFi + GPS (Included)</span>
+                        </div>
                     </div>
-                  </div>
-                </div>
+                    </div>
               </div>
 
               <div>
@@ -203,18 +221,6 @@ const Product = () => {
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-[#3D52A0]">Configure Your Device</h2>
                     <div className="flex items-center">
-                      <div className="relative">
-                        <FaQuestionCircle 
-                          className="text-[#7091E6] cursor-help" 
-                          onMouseEnter={toggleTooltip}
-                          onMouseLeave={toggleTooltip}
-                        />
-                        {showTooltip && (
-                          <div className="absolute z-10 bg-white p-3 rounded-lg shadow-lg text-sm w-60 right-0 top-full mt-1">
-                            The number of slots equals the number of pins needed on the device for each product in your vending machine.
-                          </div>
-                        )}
-                      </div>
                     </div>
                   </div>
                   
@@ -242,6 +248,11 @@ const Product = () => {
                           onMouseEnter={toggleTooltip}
                           onMouseLeave={toggleTooltip}
                         />
+                        {showTooltip && (
+                          <div className="absolute z-10 bg-white p-3 rounded-lg shadow-lg text-sm w-60 right-0 top-full mt-1">
+                            The number of slots equals the number of pins needed on the device for each product in your vending machine.
+                          </div>
+                        )}
                       </div>
                     </h3>
                   </div>
@@ -262,8 +273,8 @@ const Product = () => {
                   </div>
                   
                   <div className="mb-2 flex items-center">
-                    <span className="text-[#8697C4] mr-2">Price per additional slot:</span>
-                    <span className="font-medium text-[#3D52A0]">${prices.extraSlot}</span>
+                    <span className="text-[#8697C4] mr-2">Price per additional 8 slots:</span>
+                    <span className="font-medium text-[#3D52A0]">${prices.extraSlotBundle}</span>
                   </div>
                   
                   <div className="mb-8">
@@ -300,9 +311,9 @@ const Product = () => {
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-[#8697C4]">Extra Slots Cost:</span>
                         <span className="font-medium text-[#3D52A0]">
-                          ${((selectedSlots - 8) * prices.extraSlot * quantity).toFixed(2)}
+                          ${(getExtraSlotBundles() * prices.extraSlotBundle * quantity).toFixed(2)}
                           <span className="text-xs text-[#8697C4] ml-1">
-                            ({selectedSlots - 8} extra slots × ${prices.extraSlot})
+                            ({getExtraSlotBundles()} × 8-slot bundle{getExtraSlotBundles() > 1 ? 's' : ''})
                           </span>
                         </span>
                       </div>
@@ -576,11 +587,13 @@ const Product = () => {
                         </div>
                         <div>
                           <div className="font-medium text-[#3D52A0]">Product Slots</div>
-                          <div className="text-xs text-[#8697C4]">{selectedSlots - 8} extra slots</div>
+                          <div className="text-xs text-[#8697C4]">
+                            {getExtraSlotBundles()} × 8-slot bundle{getExtraSlotBundles() > 1 ? 's' : ''}
+                          </div>
                         </div>
                       </div>
                       <div className="font-medium text-[#3D52A0]">
-                        ${((selectedSlots - 8) * prices.extraSlot * quantity).toFixed(2)}
+                        ${(getExtraSlotBundles() * prices.extraSlotBundle * quantity).toFixed(2)}
                       </div>
                     </div>
                   )}
